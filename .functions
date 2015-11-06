@@ -244,3 +244,17 @@ function o() {
 function tre() {
 	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
+
+# `jb` with no arguments opens the current directory in PHPStorm / PyCharm / Ruby
+# Mine depending on the content
+function jb() {
+ app='webstorm.app'
+ if [ -f Gemfile.lock ] ;then
+	app='rubymine.app'
+ elif [ -f composer.json ] ;then
+  app='phpstorm.app'
+ elif [ -f 'requirements.txt' ] ;then
+  app='pycharm.app'
+ fi
+ open -a $app .
+}
