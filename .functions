@@ -245,16 +245,52 @@ function tre() {
 	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
 
-# `jb` with no arguments opens the current directory in PHPStorm / PyCharm / Ruby
-# Mine depending on the content
+# `jb` opens the current directory in PHPStorm / PyCharm / RubyMine depending on
+# its content
 function jb() {
- app='webstorm.app'
- if [ -f Gemfile.lock ] ;then
-	app='rubymine.app'
- elif [ -f composer.json ] ;then
-  app='phpstorm.app'
- elif [ -f 'requirements.txt' ] ;then
-  app='pycharm.app'
- fi
- open -a $app .
+	app='webstorm.app'
+	if [ -f Gemfile.lock ] ;then
+		app='rubymine.app'
+	elif [ -f composer.json ] ;then
+		app='phpstorm.app'
+	elif [ -f 'requirements.txt' ] ;then
+		app='pycharm.app'
+	fi
+	open -a $app .
+}
+
+# `gsave` stashes the current differences, and saves a patch to Dropbox to be
+# later used on a different machine
+function gsave() {
+	if ! [ -d .git ]; then
+		echo "You are not in a Git repository!"
+		return
+	fi
+	local current_project_name=$(basename `git rev-parse --show-toplevel`)
+	if [ -f "$HOME/Dropbox/stashes/$current_project_name.stash" ]; then
+		echo "A stash already exists for this project. Please retreive that first."
+		return
+	fi
+	git add *
+	git stash
+	mkdir -p "$HOME/Dropbox/stashes/"
+	git stash show -p > "$HOME/Dropbox/stashes/$current_project_name.stash"
+	echo "Saved. See you on the other machine."
+}
+
+# `gretrieve` retrieves the saved stash from Dropbox and applies it. Then, it
+# removes it from Dropbox so it can be saved again
+function gretrieve() {
+	if ! [ -d .git ]; then
+		echo "You are not in a Git repository!"
+		return
+	fi
+	local current_project_name=$(basename `git rev-parse --show-toplevel`)
+	if ! [ -f "$HOME/Dropbox/stashes/$current_project_name.stash" ]; then
+		echo "Sorry, no stash available in Dropbox!"
+		return
+	fi
+	git apply "$HOME/Dropbox/stashes/$current_project_name.stash"
+	rm "$HOME/Dropbox/stashes/$current_project_name.stash"
+	echo "Stash applied!"
 }
