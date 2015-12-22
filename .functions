@@ -293,6 +293,7 @@ function gretrieve() {
 		echo "Sorry, no stash available in Dropbox!"
 		return
 	fi
+	git pull
 	git apply "$HOME/Dropbox/.stashes/$current_project_name.stash"
 	rm "$HOME/Dropbox/.stashes/$current_project_name.stash"
 	echo "Stash applied!"
