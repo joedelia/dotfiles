@@ -277,6 +277,7 @@ function gsave() {
 	mkdir -p "$HOME/Dropbox/.stashes/"
 	git stash show -p > "$HOME/Dropbox/.stashes/$current_project_name.stash"
 	git stash drop
+	git push
 	echo "Saved. See you on the other machine."
 }
 
