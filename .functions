@@ -256,7 +256,7 @@ function jb() {
 	elif [ -f 'requirements.txt' ] ;then
 		app='pycharm.app'
 	fi
-	open -a $app .
+	open -a $app -F .
 }
 
 # `gsave` stashes the current differences, and saves a patch to Dropbox to be
