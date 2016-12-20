@@ -1190,6 +1190,10 @@
 	<string>8243448C-A862-4ABF-88B5-74E4F6A72893</string>
 	<key>NoSyncNeverRemindPrefsChangesCopy</key>
 	<true/>
+	<key>NoSyncNeverRemindPrefsChangesLostForFile</key>
+	<true/>
+	<key>NoSyncNeverRemindPrefsChangesLostForFile_selection</key>
+	<integer>0</integer>
 	<key>NoSyncPermissionToShowTip</key>
 	<false/>
 	<key>NoSyncTimeOfFirstLaunchOfVersionWithTip</key>
