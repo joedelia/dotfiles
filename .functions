@@ -267,7 +267,10 @@ function gsave() {
 		return
 	fi
 	local current_project_name=$(cut -d ":" -f 2 <<< `git config --get remote.origin.url`)
-  current_project_name=${current_project_name/\//-}
+  if [[ $current_project_name == "//git@"* ]]; then
+    current_project_name=$(cut -d "/" -f 4,5 <<< $current_project_name)
+  fi
+	current_project_name=${current_project_name/\//-}
 	if [ -f "$HOME/Dropbox/.stashes/$current_project_name.stash" ]; then
 		echo "A stash already exists for this project. Please retreive that first."
 		return
@@ -288,6 +291,9 @@ function gretrieve() {
 		return
 	fi
   local current_project_name=$(cut -d ":" -f 2 <<< `git config --get remote.origin.url`)
+  if [[ $current_project_name == "//git@"* ]]; then
+    current_project_name=$(cut -d "/" -f 4,5 <<< $current_project_name)
+  fi
   current_project_name=${current_project_name/\//-}
 	if ! [ -f "$HOME/Dropbox/.stashes/$current_project_name.stash" ]; then
 		echo "Sorry, no stash available in Dropbox!"
