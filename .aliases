@@ -18,7 +18,7 @@ alias be="bundle exec "
 
 
 # Start screensaver
-alias ss="open -a /System/Library/Frameworks/ScreenSaver.framework/Versions/A/Resources/ScreenSaverEngine.app"
+alias ss="open -a /System/Library/CoreServices/ScreenSaverEngine.app"
 
 # Detect which `ls` flavor is in use
 if ls --color > /dev/null 2>&1; then # GNU `ls`
