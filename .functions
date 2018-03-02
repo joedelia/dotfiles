@@ -304,3 +304,8 @@ function gretrieve() {
   rm "$HOME/Dropbox/.stashes/$current_project_name.stash"
   echo "Stash applied!"
 }
+
+function call() {
+  curl -d "{\"type\":\"call\",\"endpoint\":\"https://pbx.sipcentric.com/api/v1/customers/$NIMVELO_COMPANY/endpoints/$NIMVELO_EXTENSION\",\"to\":\"$@\"}" \
+       -H "Content-Type: application/json" -H "Authorization: Basic $NIMVELO_AUTH" -X POST https://pbx.sipcentric.com/api/v1/customers/me/calls
+}
