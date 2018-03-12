@@ -306,6 +306,9 @@ function gretrieve() {
 }
 
 function call() {
-  curl -d "{\"type\":\"call\",\"endpoint\":\"https://pbx.sipcentric.com/api/v1/customers/$NIMVELO_COMPANY/endpoints/$NIMVELO_EXTENSION\",\"to\":\"$@\"}" \
+  local number="$@"
+  number="${number/+/00}"
+  number="${number//[^0-9]/}"
+  curl -d "{\"type\":\"call\",\"endpoint\":\"https://pbx.sipcentric.com/api/v1/customers/$NIMVELO_COMPANY/endpoints/$NIMVELO_EXTENSION\",\"to\":\"$number\"}" \
        -H "Content-Type: application/json" -H "Authorization: Basic $NIMVELO_AUTH" -X POST https://pbx.sipcentric.com/api/v1/customers/me/calls
 }
