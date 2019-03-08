@@ -273,12 +273,12 @@ function gsave() {
 		echo "A stash already exists for this project. Please retrieve that first."
 		return
 	fi
-	git add * && \
-	mkdir -p "$HOME/Dropbox/.stashes/" && \
-	git diff --binary --cached > "$HOME/Dropbox/.stashes/$current_project_name.stash" && \
-	git reset --hard && \
-	git push && \
-  open -a "Dropbox" && \
+	git add *
+	mkdir -p "$HOME/Dropbox/.stashes/"
+	git diff --binary --cached > "$HOME/Dropbox/.stashes/$current_project_name.stash"
+	git reset --hard
+	git push
+  open -a "Dropbox"
 	echo "Saved. See you on the other machine."
 }
 
