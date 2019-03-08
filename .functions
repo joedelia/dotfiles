@@ -270,15 +270,15 @@ function gsave() {
   local current_branch=$(git branch | grep -e "^*" | cut -d' ' -f 2)
   current_project_name="${current_project_name/\//-}--${current_branch}"
 	if [ -f "$HOME/Dropbox/.stashes/$current_project_name.stash" ]; then
-		echo "A stash already exists for this project. Please retreive that first."
+		echo "A stash already exists for this project. Please retrieve that first."
 		return
 	fi
-	git add *
-	mkdir -p "$HOME/Dropbox/.stashes/"
-	git diff --binary --cached > "$HOME/Dropbox/.stashes/$current_project_name.stash"
-	git reset --hard
-	git push
-  open -a "Dropbox"
+	git add * && \
+	mkdir -p "$HOME/Dropbox/.stashes/" && \
+	git diff --binary --cached > "$HOME/Dropbox/.stashes/$current_project_name.stash" && \
+	git reset --hard && \
+	git push && \
+  open -a "Dropbox" && \
 	echo "Saved. See you on the other machine."
 }
 
@@ -297,9 +297,9 @@ function gretrieve() {
 		echo "Sorry, no stash available in Dropbox!"
 		return
 	fi
-	git pull
-	git apply "$HOME/Dropbox/.stashes/$current_project_name.stash"
-	rm "$HOME/Dropbox/.stashes/$current_project_name.stash"
+	git pull && \
+	git apply "$HOME/Dropbox/.stashes/$current_project_name.stash" && \
+	rm "$HOME/Dropbox/.stashes/$current_project_name.stash" && \
 	echo "Stash applied!"
 }
 
