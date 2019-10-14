@@ -298,8 +298,8 @@ function gretrieve() {
     return
   fi
   git pull
-  git apply "$HOME/Dropbox/.stashes/$current_project_name.stash" -3
-  rm "$HOME/Dropbox/.stashes/$current_project_name.stash"
+  git apply "$HOME/Dropbox/.stashes/$current_project_name.stash" -3 && \
+  rm "$HOME/Dropbox/.stashes/$current_project_name.stash" && \
   echo "Stash applied!"
 }
 
