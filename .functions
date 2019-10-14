@@ -262,27 +262,27 @@ function jb() {
 # `gsave` stashes the current differences, and saves a patch to Dropbox to be
 # later used on a different machine
 function gsave() {
-	if ! [ -d .git ]; then
-		echo "You are not in a Git repository!"
-		return
-	fi
+  if ! [ -d .git ]; then
+    echo "You are not in a Git repository!"
+    return
+  fi
   local current_project_name=$(cut -d ":" -f 2 <<< `git config --get remote.origin.url`)
   local current_branch=$(git branch | grep -e "^*" | cut -d' ' -f 2)
   current_project_name="${current_project_name/\//-}--${current_branch}"
-	if [ -f "$HOME/Dropbox/.stashes/$current_project_name.stash" ]; then
-		echo "A stash already exists for this project. Please retreive that first."
-		return
-	fi
-	git add *
-	mkdir -p "$HOME/Dropbox/.stashes/"
-	git diff --binary --cached > "$HOME/Dropbox/.stashes/$current_project_name.stash"
-	git reset --hard
-	git push
+  if [ -f "$HOME/Dropbox/.stashes/$current_project_name.stash" ]; then
+    echo "A stash already exists for this project. Please retreive that first."
+    return
+  fi
+  git add *
+  mkdir -p "$HOME/Dropbox/.stashes/"
+  git diff --binary --cached > "$HOME/Dropbox/.stashes/$current_project_name.stash"
+  git reset --hard
+  git push
   open -a "Dropbox"
-	echo "Saved. See you on the other machine."
+  echo "Saved. See you on the other machine."
 }
 
-# `gretrieve` retrieves the saved stash from Dropbox and applies it. Then, it
+# `rieve` retrieves the saved stash from Dropbox and applies it. Then, it
 # removes it from Dropbox so it can be saved again
 function gretrieve() {
   if ! [ -d .git ]; then
@@ -293,14 +293,14 @@ function gretrieve() {
   local current_project_name=$(cut -d ":" -f 2 <<< `git config --get remote.origin.url`)
   local current_branch=$(git branch | grep -e "^*" | cut -d' ' -f 2)
   current_project_name="${current_project_name/\//-}--${current_branch}"
-	if ! [ -f "$HOME/Dropbox/.stashes/$current_project_name.stash" ]; then
-		echo "Sorry, no stash available in Dropbox!"
-		return
-	fi
-	git pull
-	git apply "$HOME/Dropbox/.stashes/$current_project_name.stash"
-	rm "$HOME/Dropbox/.stashes/$current_project_name.stash"
-	echo "Stash applied!"
+  if ! [ -f "$HOME/Dropbox/.stashes/$current_project_name.stash" ]; then
+    echo "Sorry, no stash available in Dropbox!"
+    return
+  fi
+  git pull
+  git apply "$HOME/Dropbox/.stashes/$current_project_name.stash" -3
+  rm "$HOME/Dropbox/.stashes/$current_project_name.stash"
+  echo "Stash applied!"
 }
 
 function call() {
