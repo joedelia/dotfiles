@@ -278,7 +278,11 @@ function gsave() {
   git diff --binary --cached > "$HOME/Dropbox/.stashes/$current_project_name.stash"
   git reset --hard
   git push
-  open -a "Dropbox"
+  if ! pgrep -x "Dropbox" > /dev/null
+  then
+    open -a "Dropbox"
+    echo "Opened Dropbox"
+  fi
   echo "Saved. See you on the other machine."
 }
 
@@ -289,7 +293,12 @@ function gretrieve() {
     echo "You are not in a Git repository!"
     return
   fi
-  open -a "Dropbox"
+  if ! pgrep -x "Dropbox" > /dev/null
+  then
+    open -a "Dropbox"
+    echo "Opened Dropbox. Will wait a few seconds."
+    sleep 5
+  fi
   local current_project_name=$(cut -d ":" -f 2 <<< `git config --get remote.origin.url`)
   local current_branch=$(git branch | grep -e "^*" | cut -d' ' -f 2)
   current_project_name="${current_project_name/\//-}--${current_branch}"
