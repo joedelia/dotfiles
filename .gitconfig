@@ -173,3 +173,6 @@
 [url "git://gist.github.com/"]
 
   insteadOf = "gist:"
+
+[pull]
+    rebase = true
