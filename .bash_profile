@@ -52,3 +52,8 @@ complete -o "nospace" -W "Contacts Calendar Dock Finder Mail Safari iTunes Syste
 
 # Loads RbEnv
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+
+# Adds git autocomplete
+if [ -f `brew --prefix`/etc/bash_completion.d/git-completion.bash ]; then
+  . `brew --prefix`/etc/bash_completion.d/git-completion.bash
+fi
