@@ -16,6 +16,9 @@ alias j="jobs"
 alias se="source .env"
 alias be="bundle exec "
 
+# Colorize cat
+alias cat=ccat
+
 
 # Start screensaver
 alias ss="open -a /System/Library/CoreServices/ScreenSaverEngine.app"
