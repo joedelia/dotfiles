@@ -100,6 +100,7 @@ brew install zopfli
 # Install other utilities
 brew install httpie
 brew install ccat
+brew install gh
 
 # Install version managers
 brew install n
