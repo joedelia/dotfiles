@@ -16,9 +16,12 @@ alias j="jobs"
 alias se="source .env"
 alias be="bundle exec "
 
+# Git shortcuts
+alias master="git checkout master"
+alias production="git checkout production"
+
 # Colorize cat
 alias cat=ccat
-
 
 # Start screensaver
 alias ss="open -a /System/Library/CoreServices/ScreenSaverEngine.app"
