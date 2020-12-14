@@ -18,7 +18,7 @@ alias be="bundle exec "
 
 # Git shortcuts
 alias master="git checkout master"
-alias production="git checkout production"
+alias prod="git checkout production"
 
 # Colorize cat
 alias cat=ccat
