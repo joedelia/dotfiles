@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Brew list:
+# autoconf	gdbm		icu4c		mpdecimal	pkg-config	rbenv		sqlite
+# ca-certificates	gh		krb5		nvm		postgresql@13	readline	starship
+# ccat		httpie		m4		openssl@1.1	python@3.10	ruby-build	xz
+
 # Install command-line tools using Homebrew.
 
 # Make sure we’re using the latest Homebrew.
@@ -81,7 +86,7 @@ brew install xz
 # Install other useful binaries.
 brew install ack
 #brew install exiv2
-brew install git
+# brew install git
 brew install git-lfs
 brew install gs
 brew install imagemagick --with-webp

@@ -1,17 +1,13 @@
-#!/usr/bin/env bash
-
-cd "$(dirname "${BASH_SOURCE}")";
-
-git pull origin main;
-
 function doIt() {
   rsync --exclude ".git/" \
     --exclude ".DS_Store" \
     --exclude "bootstrap.sh" \
     --exclude "README.md" \
+    --exclude "brew.sh" \
     --exclude "LICENSE-MIT.txt" \
+    --exclude "iterm-profile.json" \
+    --exclude ".editorconfig" \
     -avh --no-perms . ~;
-  source ~/.bash_profile;
 }
 
 if [ "$1" == "--force" -o "$1" == "-f" ]; then

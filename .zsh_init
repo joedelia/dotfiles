@@ -1,0 +1,33 @@
+eval "$(starship init zsh)"
+
+# autocomplete
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'  'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+
+## Remove the beep
+unsetopt LIST_BEEP
+
+## auto CD
+setopt auto_cd
+setopt multios
+setopt prompt_subst
+
+# nvm
+export NVM_DIR="$HOME/.nvm"
+## This loads nvm
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \.  "/opt/homebrew/opt/nvm/nvm.sh"
+## This loads nvm bash_completion
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+
+# rbenv
+eval "$(rbenv init - zsh)"
+
+# Other files
+source ~/.aliases
+source ~/.functions
+
+GIT_AUTHOR_NAME="Joe d'Elia"
+GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
+git config --global user.name "$GIT_AUTHOR_NAME"
+GIT_AUTHOR_EMAIL="joe@delia.is"
+GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
+git config --global user.email "$GIT_AUTHOR_EMAIL"
