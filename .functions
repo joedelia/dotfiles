@@ -109,3 +109,37 @@ function o() {
 function tre() {
   tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
+
+# `envsync` syncs the .env file in the project in Dropbox
+function envsync() {
+  if ! [ -d .git ]; then
+    echo "You are not in a Git repository!"
+    return
+  fi
+  local current_project_name=$(cut -d ":" -f 2 <<< `git config --get remote.origin.url`)
+  current_project_name="${current_project_name/\//-}.env"
+
+  if [ -L .env ] ; then
+    if [ -e .env ] ; then
+      echo "Link already set up!"
+    else
+      echo "" > "$HOME/Dropbox/dotenvs/${current_project_name}"
+      echo "Created empty file (link already existed)"
+    fi
+  elif [ -e .env ] ; then
+    mv .env "$HOME/Dropbox/dotenvs/${current_project_name}"
+    ln -s "$HOME/Dropbox/dotenvs/${current_project_name}" .env
+    echo "Moved .env to Dropbox and created link"
+  else
+    echo "" > "$HOME/Dropbox/dotenvs/${current_project_name}"
+    ln -s "$HOME/Dropbox/dotenvs/${current_project_name}" .env
+    echo "Created empty .env file and link"
+  fi
+
+
+  if ! pgrep -x "Dropbox" > /dev/null
+  then
+    open -a "Dropbox"
+    echo "Opened Dropbox"
+  fi
+}
