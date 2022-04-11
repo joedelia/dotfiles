@@ -80,6 +80,9 @@
   # Show the user email for the current repository.
   whoami = config user.email
 
+  # Undoes the last commit
+  uncommit = "!git reset --soft HEAD^"
+
 [apply]
 
   # Detect whitespace errors when applying a patch
