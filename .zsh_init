@@ -3,6 +3,10 @@ eval "$(starship init zsh)"
 # autocomplete
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'  'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
+# search with up and down
+bindkey "^[[A" history-beginning-search-backward
+bindkey "^[[B" history-beginning-search-forward
+
 ## Remove the beep
 unsetopt LIST_BEEP
 
