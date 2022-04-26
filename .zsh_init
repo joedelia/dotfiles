@@ -10,6 +10,11 @@ bindkey "^[[B" history-beginning-search-forward
 ## Remove the beep
 unsetopt LIST_BEEP
 
+## Removes weird % sign after a curl
+setopt PROMPT_CR
+setopt PROMPT_SP
+export PROMPT_EOL_MARK=""
+
 ## auto CD
 setopt auto_cd
 setopt multios
