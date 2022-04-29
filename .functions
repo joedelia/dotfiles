@@ -117,6 +117,7 @@ function envsync() {
     return
   fi
   local current_project_name=$(cut -d ":" -f 2 <<< `git config --get remote.origin.url`)
+  current_project_name="${current_project_name%.*}"
   current_project_name="${current_project_name/\//-}.env"
 
   if [ -L .env ] ; then
