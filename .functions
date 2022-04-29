@@ -131,6 +131,9 @@ function envsync() {
     mv .env "$HOME/Dropbox/dotenvs/${current_project_name}"
     ln -s "$HOME/Dropbox/dotenvs/${current_project_name}" .env
     echo "Moved .env to Dropbox and created link"
+  elif [ -e "$HOME/Dropbox/dotenvs/${current_project_name}" ] ; then
+    ln -s "$HOME/Dropbox/dotenvs/${current_project_name}" .env
+    echo "Linked existing .env file"
   else
     echo "" > "$HOME/Dropbox/dotenvs/${current_project_name}"
     ln -s "$HOME/Dropbox/dotenvs/${current_project_name}" .env
