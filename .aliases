@@ -14,7 +14,7 @@ alias se="source .env"
 alias be="bundle exec "
 
 # Git shortcuts
-alias master="git checkout master"
+alias master="git checkout master 2>/dev/null || git checkout main"
 alias prod="git checkout production"
 
 # Colorize cat
