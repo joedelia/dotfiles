@@ -112,10 +112,12 @@ function tre() {
 
 # `envsync` syncs the .env file in the project in Dropbox
 function envsync() {
-  if ! [ -d .git ]; then
-    echo "You are not in a Git repository!"
+  git rev-parse --is-inside-work-tree &> /dev/null
+  if [ $? -ne 0 ]; then
+    echo "Not a git repository"
     return
   fi
+
   local current_project_name=$(cut -d ":" -f 2 <<< `git config --get remote.origin.url`)
   current_project_name="${current_project_name%.*}"
   local current_path=$(git rev-parse --show-prefix)
