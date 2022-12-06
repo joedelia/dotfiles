@@ -118,6 +118,11 @@ function envsync() {
   fi
   local current_project_name=$(cut -d ":" -f 2 <<< `git config --get remote.origin.url`)
   current_project_name="${current_project_name%.*}"
+  local current_path=$(git rev-parse --show-prefix)
+  if [ -n "$current_path" ]; then
+    current_path="--${current_path//\//-}"
+  fi
+  current_project_name="${current_project_name}${current_path}"
   current_project_name="${current_project_name/\//-}.env"
 
   if [ -L .env ] ; then
