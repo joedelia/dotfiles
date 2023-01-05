@@ -173,6 +173,20 @@ create-machine () {
     if [ -z "$DOCKER_MACHINE_NAME" ]
         then DOCKER_MACHINE_NAME=default
     fi
+
+    if [ ! -f ~/.ssh/config ]; then
+      touch ~/.ssh/config
+      chmod 600 ~/.ssh/config
+    fi
+
+    if ! grep -q "StrictHostKeyChecking no" ~/.ssh/config; then
+      echo "MATCH exec \"test -d ~/.docker/machine/machines/%h\"
+        StrictHostKeyChecking no
+        UserKnownHostsFile /dev/null
+        IdentityFile ~/.docker/machine/machines/%h/id_rsa
+        User root" >> ~/.ssh/config
+    fi
+
     sudo -v # login now for later use
     docker-machine create $DOCKER_MACHINE_NAME
     eval `docker-machine env $DOCKER_MACHINE_NAME`
