@@ -55,6 +55,7 @@ eval "$(rbenv init - zsh)"
 # Other files
 source ~/.aliases
 source ~/.functions
+source ~/.dockermachine-config
 
 GIT_AUTHOR_NAME="Joe d'Elia"
 GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"

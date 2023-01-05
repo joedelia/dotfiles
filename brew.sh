@@ -111,5 +111,10 @@ brew install gh
 brew install n
 brew install rbenv ruby-build
 
+# Docker machine stuff
+brew install docker-machine
+brew install mutagen-io/mutagen/mutagen
+brew install xwmx/taps/hosts
+
 # Remove outdated versions from the cellar.
 brew cleanup

@@ -159,3 +159,45 @@ function envsync() {
 function dark() {
   osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to not dark mode'
 }
+
+# Docker machine
+machine () {
+    DOCKER_MACHINE_NAME="$1"
+    if [ -z "$DOCKER_MACHINE_NAME" ]
+        then DOCKER_MACHINE_NAME=default
+    fi
+    eval `docker-machine env $DOCKER_MACHINE_NAME`
+}
+create-machine () {
+    DOCKER_MACHINE_NAME="$1"
+    if [ -z "$DOCKER_MACHINE_NAME" ]
+        then DOCKER_MACHINE_NAME=default
+    fi
+    sudo -v # login now for later use
+    docker-machine create $DOCKER_MACHINE_NAME
+    eval `docker-machine env $DOCKER_MACHINE_NAME`
+    sudo hosts remove --force $DOCKER_MACHINE_NAME
+    sudo hosts add `docker-machine ip $DOCKER_MACHINE_NAME` \
+        $DOCKER_MACHINE_NAME "docker machine host"
+}
+sync-machine () {
+    if [ ! -z "$1" ]; then machine "$1"; fi
+    ssh $DOCKER_MACHINE_NAME "mkdir -p $PWD && chmod 777 $PWD"
+    # add additional commands for your setup
+    mutagen sync create --sync-mode two-way-resolved \
+        --label "machine=$DOCKER_MACHINE_NAME" \
+        --name "$(basename $PWD)" \
+        --ignore-vcs \
+        $PWD $DOCKER_MACHINE_NAME:$PWD
+}
+drop-machine () {
+    if [ ! -z "$1" ]; then machine "$1"; fi
+    sudo -v # login now for later use
+    docker-machine rm $DOCKER_MACHINE_NAME
+    mutagen sync terminate --label-selector "machine=$DOCKER_MACHINE_NAME"
+    sudo hosts remove --force $DOCKER_MACHINE_NAME
+}
+create-machine-here () {
+    create-machine "$1"
+    sync-machine
+}

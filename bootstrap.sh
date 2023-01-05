@@ -8,7 +8,14 @@ function doIt() {
     --exclude "LICENSE-MIT.txt" \
     --exclude "iterm-profile.json" \
     --exclude ".editorconfig" \
+    --exclude ".dockermachine-config" \
+    --exclude ".editorconfig" \
     -avh --no-perms . ~;
+
+  # If .dockermachine-config doesn't exist, copy it
+  if [ ! -f ~/.dockermachine-config ]; then
+    cp .dockermachine-config ~/.dockermachine-config
+  fi
 }
 
 if [ "$1" == "--force" -o "$1" == "-f" ]; then

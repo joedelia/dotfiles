@@ -1,0 +1,5 @@
+export MACHINE_DRIVER=digitalocean
+export DIGITALOCEAN_ACCESS_TOKEN=
+export DIGITALOCEAN_REGION=lon1
+export DIGITALOCEAN_IMAGE=ubuntu-18-04-x64
+export DIGITALOCEAN_SIZE=s-2vcpu-4gb
