@@ -112,6 +112,7 @@ brew install n
 brew install rbenv ruby-build
 
 # Docker machine stuff
+brew install lazydocker
 brew install docker-machine
 brew install mutagen-io/mutagen/mutagen
 brew install xwmx/taps/hosts
