@@ -83,6 +83,9 @@
   # Undoes the last commit
   uncommit = "!git reset --soft HEAD^"
 
+  # Fuzzy select
+  bselect = "!branches=$(git branch) && branch=$(echo \"$branches\" | fzf --reverse +s +m) && git checkout $(echo \"$branch\" | sed \"s/.* //\")"
+
 [apply]
 
   # Detect whitespace errors when applying a patch

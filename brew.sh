@@ -101,6 +101,7 @@ brew install ssh-copy-id
 brew install tree
 brew install vbindiff
 brew install zopfli
+brew install fzf
 
 # Install other utilities
 brew install httpie
