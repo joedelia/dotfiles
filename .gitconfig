@@ -84,7 +84,7 @@
   uncommit = "!git reset --soft HEAD^"
 
   # Fuzzy select
-  bselect = "!branches=$(git branch) && branch=$(echo \"$branches\" | fzf --reverse +s +m) && git checkout $(echo \"$branch\" | sed \"s/.* //\")"
+  bselect = "!branches=$(git branch -a) && branch=$(echo \"$branches\" | fzf --reverse +s +m) && git checkout $(echo \"$branch\" | sed \"s/.* //\" | sed \"s/^remotes\\/origin\\///\")"
 
 [apply]
 
