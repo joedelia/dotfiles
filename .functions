@@ -125,6 +125,25 @@ function dark() {
   osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to not dark mode'
 }
 
+# Dependabot merge all PRs
+function dependabot-merge-all() {
+  for i in $(gh pr list --limit 100 --json number --json author --jq '.[] | select(.author.login == "app/dependabot") | .number'); do
+    echo "Merging PR #$i"
+    gh pr review $i --approve
+    gh pr merge $i --squash --delete-branch
+
+    # Capture the exit status immediately after the merge command
+    merge_status=$?
+
+    if [ $merge_status -ne 0 ]; then
+      gh pr comment $i --body "@dependabot recreate"
+      echo "Failed to merge PR #$i, will recreate"
+    else
+      echo "Merged PR #$i"
+    fi
+  done
+}
+
 # Docker machine
 machine () {
     DOCKER_MACHINE_NAME="$1"
