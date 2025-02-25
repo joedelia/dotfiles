@@ -130,7 +130,7 @@ function dependabot-merge-all() {
   for i in $(gh pr list --limit 100 --json number --json author --jq '.[] | select(.author.login == "app/dependabot") | .number'); do
     echo "Merging PR #$i"
     gh pr review $i --approve
-    gh pr merge $i --squash --delete-branch
+    gh pr merge $i --merge --delete-branch
 
     # Capture the exit status immediately after the merge command
     merge_status=$?
