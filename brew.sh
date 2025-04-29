@@ -118,5 +118,11 @@ brew install docker-machine
 brew install mutagen-io/mutagen/mutagen
 brew install xwmx/taps/hosts
 
+# Terminal stuff
+brew install starship
+
+# Dependencies
+brew install nvm
+
 # Remove outdated versions from the cellar.
 brew cleanup
