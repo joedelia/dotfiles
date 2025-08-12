@@ -8,6 +8,10 @@ function cdf() { # short for `cdfinder`
   cd "$(osascript -e 'tell app "Finder" to POSIX path of (insertion location as alias)')";
 }
 
+# Keep awake
+function nosleep() {
+  pmset noidle;
+}
 
 # Determine size of a file or total size of a directory
 function fs() {
