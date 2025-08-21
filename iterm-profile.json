@@ -188,7 +188,7 @@
     "Green Component" : 0.14910027384757996
   },
   "Semantic History" : {
-    "text" : "\/usr\/local\/bin\/zed \\1:\\2",
+    "text" : "\/usr\/local\/bin\/zed \\1:0\\2",
     "action" : "coprocess",
     "editor" : "com.github.atom"
   },
