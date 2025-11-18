@@ -86,6 +86,12 @@
   # Fuzzy select
   bselect = "!branches=$(git branch -a) && branch=$(echo \"$branches\" | fzf --reverse +s +m) && git checkout $(echo \"$branch\" | sed \"s/.* //\" | sed \"s/^remotes\\/origin\\///\")"
 
+  stash-untracked = "!f() {    \
+      git stash;               \
+      git stash -u;            \
+      git stash pop stash@{1}; \
+  }; f"
+
 [apply]
 
   # Detect whitespace errors when applying a patch
