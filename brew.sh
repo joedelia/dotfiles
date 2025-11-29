@@ -88,6 +88,7 @@ brew install ack
 #brew install exiv2
 # brew install git
 brew install git-lfs
+brew install watch
 brew install gs
 brew install imagemagick --with-webp
 brew install lua
@@ -107,10 +108,10 @@ brew install fzf
 brew install httpie
 brew install ccat
 brew install gh
+brew install lazygit
 
 # Install version managers
-brew install n
-brew install rbenv ruby-build
+brew install nvm
 
 # Docker machine stuff
 brew install lazydocker
@@ -120,9 +121,6 @@ brew install xwmx/taps/hosts
 
 # Terminal stuff
 brew install starship
-
-# Dependencies
-brew install nvm
 
 # Remove outdated versions from the cellar.
 brew cleanup
