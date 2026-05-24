@@ -121,6 +121,7 @@ brew install xwmx/taps/hosts
 
 # Terminal stuff
 brew install starship
+brew install terminal-notifier
 
 # Remove outdated versions from the cellar.
 brew cleanup

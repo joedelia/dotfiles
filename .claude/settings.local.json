@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(command -v fzf)"
+      "Bash(command -v fzf)",
+      "Bash(zsh -c 'setopt | grep -i \"xtrace\\\\|verbose\"')",
+      "Bash(zsh -i -c 'setopt | grep -iE \"xtrace|verbose|debug\"')",
+      "Bash(env)",
+      "Bash(zsh -c 'source /Users/delia/Code/dotfiles/.functions; type connection-monitor | head -5')"
     ]
   }
 }

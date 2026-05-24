@@ -145,65 +145,148 @@ function tz() {
 #   - all succeed       → up
 #   - all fail          → down
 #   - >= loss threshold → unstable
-# Useful for spotty airplane wifi.
+# Live TUI shows stats; notifications use terminal-notifier with a group so
+# new notifications replace old and all are cleared on exit. Falls back to
+# osascript (which can't be removed) if terminal-notifier isn't installed.
 function connection-monitor() {
+  # Without TYPESET_SILENT, re-declaring an existing local (e.g. `local var`
+  # in a loop) makes zsh echo the assignment — which leaks into the TUI.
+  # NO_XTRACE/NO_VERBOSE silence any ambient shell tracing. LOCAL_OPTIONS
+  # scopes all these to this function only (zsh).
+  [ -n "$ZSH_VERSION" ] && setopt LOCAL_OPTIONS TYPESET_SILENT NO_XTRACE NO_VERBOSE
+  [ -n "$BASH_VERSION" ] && { set +x; set +v; } 2>/dev/null
+
   local host="google.com"
-  local window=10           # number of pings in the rolling window
+  local window=10
   local unstable_loss_pct=30
-  local results=""          # string of 0s (fail) and 1s (success)
-  local confirmed_state="up"
+  local notify_group="connection-monitor"
 
-  echo "Monitoring $host. Ctrl+C to stop."
+  local has_tn=0
+  command -v terminal-notifier &>/dev/null && has_tn=1
 
-  while true; do
-    local ok
-    if ping -c 1 -t 2 "$host" &>/dev/null; then
+  local results="" confirmed_state="up" loss_pct=0
+  local total_ok=0 total_fail=0 last_latency="—"
+  local events=""
+  local state_started monitor_started
+  state_started=$(date +%s)
+  monitor_started=$state_started
+
+  local stop=0
+  trap 'stop=1' INT
+
+  local esc=$'\033'
+  local reset="${esc}[0m" dim="${esc}[2m" bold="${esc}[1m"
+  local red="${esc}[31m" green="${esc}[32m" yellow="${esc}[33m" cyan="${esc}[36m"
+
+  tput civis 2>/dev/null
+  printf '%s' "${esc}[2J${esc}[H"
+
+  while [ $stop -eq 0 ]; do
+    local ping_output ok
+    ping_output=$(command ping -c 1 -t 2 "$host" </dev/null 2>/dev/null)
+    if [ $? -eq 0 ]; then
       ok=1
+      total_ok=$((total_ok + 1))
+      last_latency="$(printf '%s' "$ping_output" | grep -oE 'time=[0-9.]+' | head -1 | cut -d= -f2) ms"
     else
       ok=0
+      total_fail=$((total_fail + 1))
+      last_latency="timeout"
     fi
 
     results="${results}${ok}"
-    if [ ${#results} -gt $window ]; then
-      results="${results: -$window}"
+    [ ${#results} -gt $window ] && results="${results: -$window}"
+
+    if [ ${#results} -ge $window ]; then
+      local zeros="${results//[^0]/}"
+      local fails=${#zeros}
+      loss_pct=$(( (fails * 100) / window ))
+
+      local new_state
+      if [ $fails -eq 0 ]; then
+        new_state="up"
+      elif [ $fails -eq $window ]; then
+        new_state="down"
+      elif [ $loss_pct -ge $unstable_loss_pct ]; then
+        new_state="unstable"
+      else
+        new_state="$confirmed_state"
+      fi
+
+      if [ "$new_state" != "$confirmed_state" ]; then
+        local msg sound
+        case "$new_state" in
+          up)       msg="Connection STABLE";                       sound="Glass" ;;
+          down)     msg="Connection DOWN";                         sound="Basso" ;;
+          unstable) msg="Connection UNSTABLE (${loss_pct}% loss)"; sound="Funk"  ;;
+        esac
+        if [ $has_tn -eq 1 ]; then
+          terminal-notifier -title "Connection Monitor" -message "$msg" \
+            -sound "$sound" -group "$notify_group" &>/dev/null
+        else
+          osascript -e "display notification \"$msg\" with title \"Connection Monitor\" sound name \"$sound\"" &>/dev/null
+        fi
+        events="$(printf '  [%s] %s\n%s' "$(date '+%H:%M:%S')" "$msg" "$events" | head -n 5)"
+        confirmed_state="$new_state"
+        state_started=$(date +%s)
+      fi
     fi
 
-    # Wait until the window is filled before judging.
-    if [ ${#results} -lt $window ]; then
-      sleep 1
-      continue
-    fi
+    # ---- render ----
+    local now total success_pct=100 state_dur total_dur
+    now=$(date +%s)
+    total=$((total_ok + total_fail))
+    [ $total -gt 0 ] && success_pct=$(( (total_ok * 100) / total ))
+    state_dur=$(printf '%02d:%02d' $(( (now - state_started) / 60 )) $(( (now - state_started) % 60 )))
+    total_dur=$(printf '%02d:%02d' $(( (now - monitor_started) / 60 )) $(( (now - monitor_started) % 60 )))
 
-    local zeros="${results//[^0]/}"
-    local fails=${#zeros}
-    local loss_pct=$(( (fails * 100) / window ))
+    local color label
+    case "$confirmed_state" in
+      up)       color="$green";  label="STABLE" ;;
+      unstable) color="$yellow"; label="UNSTABLE" ;;
+      down)     color="$red";    label="DOWN" ;;
+    esac
 
-    local new_state
-    if [ $fails -eq 0 ]; then
-      new_state="up"
-    elif [ $fails -eq $window ]; then
-      new_state="down"
-    elif [ $loss_pct -ge $unstable_loss_pct ]; then
-      new_state="unstable"
+    local spark="" i ch
+    for ((i=0; i<${#results}; i++)); do
+      ch="${results:$i:1}"
+      if [ "$ch" = "1" ]; then spark="${spark}${green}▇${reset}"
+      else spark="${spark}${red}▁${reset}"; fi
+    done
+    local p=$(( window - ${#results} ))
+    while [ $p -gt 0 ]; do spark="${spark}${dim}·${reset}"; p=$((p - 1)); done
+
+    printf '%s' "${esc}[H"
+    printf '  %sConnection Monitor%s   %s●%s %s%s%s\n\n' "$bold" "$reset" "$color" "$reset" "$bold$color" "$label" "$reset"
+    printf '  %sHost%s        %s\n'         "$dim" "$reset" "$host"
+    printf '  %sIn state%s    %s\n'         "$dim" "$reset" "$state_dur"
+    printf '  %sMonitoring%s  %s\n\n'       "$dim" "$reset" "$total_dur"
+    printf '  %sPings%s       %s%d ok%s / %s%d fail%s   (%s%% success)\n' \
+      "$dim" "$reset" "$green" "$total_ok" "$reset" "$red" "$total_fail" "$reset" "$success_pct"
+    printf '  %sLast ping%s   %s\n'         "$dim" "$reset" "$last_latency"
+    printf '  %sWindow%s      %s  %d%% loss\n\n' "$dim" "$reset" "$spark" "$loss_pct"
+    printf '  %sRecent events%s\n'          "$dim" "$reset"
+    if [ -n "$events" ]; then
+      printf '%s\n' "$events"
     else
-      # Loss below threshold but non-zero — hold prior state to avoid flapping.
-      new_state="$confirmed_state"
+      printf '    %s(none yet)%s\n' "$dim" "$reset"
     fi
-
-    if [ "$new_state" != "$confirmed_state" ]; then
-      local msg sound
-      case "$new_state" in
-        up)       msg="Connection STABLE"; sound="Glass" ;;
-        down)     msg="Connection DOWN"; sound="Basso" ;;
-        unstable) msg="Connection UNSTABLE (${loss_pct}% packet loss)"; sound="Funk" ;;
-      esac
-      osascript -e "display notification \"$msg\" with title \"Connection Monitor\" sound name \"$sound\"" >/dev/null
-      echo "[$(date '+%H:%M:%S')] $msg"
-      confirmed_state="$new_state"
-    fi
+    printf '\n  %sCtrl+C to stop%s' "$dim" "$reset"
+    printf '%s' "${esc}[J"
 
     sleep 1
   done
+
+  # cleanup
+  tput cnorm 2>/dev/null
+  printf '%s' "${esc}[2J${esc}[H"
+  [ $has_tn -eq 1 ] && terminal-notifier -remove "$notify_group" &>/dev/null
+  trap - INT
+
+  printf '%sConnection Monitor stopped%s\n' "$bold" "$reset"
+  printf '  Monitored:   %s\n' "$total_dur"
+  printf '  Final state: %s%s%s\n' "$color" "$label" "$reset"
+  printf '  Pings:       %d ok / %d fail  (%d%% success)\n' "$total_ok" "$total_fail" "$success_pct"
 }
 
 # Dependabot merge all PRs
