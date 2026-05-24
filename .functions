@@ -140,6 +140,72 @@ function tz() {
   [ -n "$picked" ] && sudo systemsetup -settimezone "$picked" 2>/dev/null
 }
 
+# Ping google.com and notify on connection state changes (up/unstable/down).
+# State is derived from a rolling window of the last N pings:
+#   - all succeed       → up
+#   - all fail          → down
+#   - >= loss threshold → unstable
+# Useful for spotty airplane wifi.
+function connection-monitor() {
+  local host="google.com"
+  local window=10           # number of pings in the rolling window
+  local unstable_loss_pct=30
+  local results=""          # string of 0s (fail) and 1s (success)
+  local confirmed_state="up"
+
+  echo "Monitoring $host. Ctrl+C to stop."
+
+  while true; do
+    local ok
+    if ping -c 1 -t 2 "$host" &>/dev/null; then
+      ok=1
+    else
+      ok=0
+    fi
+
+    results="${results}${ok}"
+    if [ ${#results} -gt $window ]; then
+      results="${results: -$window}"
+    fi
+
+    # Wait until the window is filled before judging.
+    if [ ${#results} -lt $window ]; then
+      sleep 1
+      continue
+    fi
+
+    local zeros="${results//[^0]/}"
+    local fails=${#zeros}
+    local loss_pct=$(( (fails * 100) / window ))
+
+    local new_state
+    if [ $fails -eq 0 ]; then
+      new_state="up"
+    elif [ $fails -eq $window ]; then
+      new_state="down"
+    elif [ $loss_pct -ge $unstable_loss_pct ]; then
+      new_state="unstable"
+    else
+      # Loss below threshold but non-zero — hold prior state to avoid flapping.
+      new_state="$confirmed_state"
+    fi
+
+    if [ "$new_state" != "$confirmed_state" ]; then
+      local msg sound
+      case "$new_state" in
+        up)       msg="Connection STABLE"; sound="Glass" ;;
+        down)     msg="Connection DOWN"; sound="Basso" ;;
+        unstable) msg="Connection UNSTABLE (${loss_pct}% packet loss)"; sound="Funk" ;;
+      esac
+      osascript -e "display notification \"$msg\" with title \"Connection Monitor\" sound name \"$sound\"" >/dev/null
+      echo "[$(date '+%H:%M:%S')] $msg"
+      confirmed_state="$new_state"
+    fi
+
+    sleep 1
+  done
+}
+
 # Dependabot merge all PRs
 function dependabot-merge-all() {
   for i in $(gh pr list --limit 100 --json number --json author --jq '.[] | select(.author.login == "app/dependabot") | .number'); do
