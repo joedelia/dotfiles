@@ -129,6 +129,17 @@ function dark() {
   osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to not dark mode'
 }
 
+# Fuzzy-pick a system timezone and set it
+function tz() {
+  sudo -v || return 1
+  local picked
+  picked=$(sudo systemsetup -listtimezones 2>/dev/null \
+    | tail -n +2 \
+    | sed 's/^[[:space:]]*//' \
+    | fzf --prompt='timezone> ') || return
+  [ -n "$picked" ] && sudo systemsetup -settimezone "$picked" 2>/dev/null
+}
+
 # Dependabot merge all PRs
 function dependabot-merge-all() {
   for i in $(gh pr list --limit 100 --json number --json author --jq '.[] | select(.author.login == "app/dependabot") | .number'); do
