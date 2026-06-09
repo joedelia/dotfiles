@@ -256,22 +256,25 @@ function connection-monitor() {
     local p=$(( window - ${#results} ))
     while [ $p -gt 0 ]; do spark="${spark}${dim}·${reset}"; p=$((p - 1)); done
 
+    # eol clears each line to its end so a shorter value can't leave stale
+    # characters from the previous frame (e.g. UNSTABLE -> STABLE = "STABLELE")
+    local eol="${esc}[K"
     printf '%s' "${esc}[H"
-    printf '  %sConnection Monitor%s   %s●%s %s%s%s\n\n' "$bold" "$reset" "$color" "$reset" "$bold$color" "$label" "$reset"
-    printf '  %sHost%s        %s\n'         "$dim" "$reset" "$host"
-    printf '  %sIn state%s    %s\n'         "$dim" "$reset" "$state_dur"
-    printf '  %sMonitoring%s  %s\n\n'       "$dim" "$reset" "$total_dur"
-    printf '  %sPings%s       %s%d ok%s / %s%d fail%s   (%s%% success)\n' \
-      "$dim" "$reset" "$green" "$total_ok" "$reset" "$red" "$total_fail" "$reset" "$success_pct"
-    printf '  %sLast ping%s   %s\n'         "$dim" "$reset" "$last_latency"
-    printf '  %sWindow%s      %s  %d%% loss\n\n' "$dim" "$reset" "$spark" "$loss_pct"
-    printf '  %sRecent events%s\n'          "$dim" "$reset"
+    printf '  %sConnection Monitor%s   %s●%s %s%s%s%s\n%s\n' "$bold" "$reset" "$color" "$reset" "$bold$color" "$label" "$reset" "$eol" "$eol"
+    printf '  %sHost%s        %s%s\n'         "$dim" "$reset" "$host" "$eol"
+    printf '  %sIn state%s    %s%s\n'         "$dim" "$reset" "$state_dur" "$eol"
+    printf '  %sMonitoring%s  %s%s\n%s\n'     "$dim" "$reset" "$total_dur" "$eol" "$eol"
+    printf '  %sPings%s       %s%d ok%s / %s%d fail%s   (%s%% success)%s\n' \
+      "$dim" "$reset" "$green" "$total_ok" "$reset" "$red" "$total_fail" "$reset" "$success_pct" "$eol"
+    printf '  %sLast ping%s   %s%s\n'         "$dim" "$reset" "$last_latency" "$eol"
+    printf '  %sWindow%s      %s  %d%% loss%s\n%s\n' "$dim" "$reset" "$spark" "$loss_pct" "$eol" "$eol"
+    printf '  %sRecent events%s%s\n'          "$dim" "$reset" "$eol"
     if [ -n "$events" ]; then
-      printf '%s\n' "$events"
+      while IFS= read -r event_line; do printf '%s%s\n' "$event_line" "$eol"; done <<< "$events"
     else
-      printf '    %s(none yet)%s\n' "$dim" "$reset"
+      printf '    %s(none yet)%s%s\n' "$dim" "$reset" "$eol"
     fi
-    printf '\n  %sCtrl+C to stop%s' "$dim" "$reset"
+    printf '\n  %sCtrl+C to stop%s%s' "$dim" "$reset" "$eol"
     printf '%s' "${esc}[J"
 
     sleep 1
