@@ -140,8 +140,10 @@ function tz() {
   [ -n "$picked" ] && sudo systemsetup -settimezone "$picked" 2>/dev/null
 }
 
-# Ping google.com and notify on connection state changes (up/unstable/down).
-# State is derived from a rolling window of the last N pings:
+# Check connectivity by fetching https://js.upscope.io/version.txt and notify
+# on connection state changes (up/unstable/down). A check succeeds only on an
+# HTTP 200 within the timeout. State is derived from a rolling window of the
+# last N checks:
 #   - all succeed       → up
 #   - all fail          → down
 #   - >= loss threshold → unstable
@@ -156,7 +158,8 @@ function connection-monitor() {
   [ -n "$ZSH_VERSION" ] && setopt LOCAL_OPTIONS TYPESET_SILENT NO_XTRACE NO_VERBOSE
   [ -n "$BASH_VERSION" ] && { set +x; set +v; } 2>/dev/null
 
-  local host="google.com"
+  local url="https://js.upscope.io/version.txt"
+  local timeout_secs=2
   local window=10
   local unstable_loss_pct=30
   local notify_group="connection-monitor"
@@ -182,16 +185,18 @@ function connection-monitor() {
   printf '%s' "${esc}[2J${esc}[H"
 
   while [ $stop -eq 0 ]; do
-    local ping_output ok
-    ping_output=$(command ping -c 1 -t 2 "$host" </dev/null 2>/dev/null)
-    if [ $? -eq 0 ]; then
+    # curl_out is "<http_code> <time_total_secs>"; only a 200 counts as up.
+    local curl_out ok
+    curl_out=$(command curl -s -o /dev/null --max-time "$timeout_secs" \
+      -w '%{http_code} %{time_total}' "$url" </dev/null 2>/dev/null)
+    if [ "${curl_out%% *}" = "200" ]; then
       ok=1
       total_ok=$((total_ok + 1))
-      last_latency="$(printf '%s' "$ping_output" | grep -oE 'time=[0-9.]+' | head -1 | cut -d= -f2) ms"
+      last_latency="$(printf '%s' "${curl_out#* }" | awk '{printf "%.0f", $1 * 1000}') ms"
     else
       ok=0
       total_fail=$((total_fail + 1))
-      last_latency="timeout"
+      last_latency="failed"
     fi
 
     results="${results}${ok}"
@@ -261,12 +266,12 @@ function connection-monitor() {
     local eol="${esc}[K"
     printf '%s' "${esc}[H"
     printf '  %sConnection Monitor%s   %s●%s %s%s%s%s\n%s\n' "$bold" "$reset" "$color" "$reset" "$bold$color" "$label" "$reset" "$eol" "$eol"
-    printf '  %sHost%s        %s%s\n'         "$dim" "$reset" "$host" "$eol"
+    printf '  %sURL%s         %s%s\n'         "$dim" "$reset" "$url" "$eol"
     printf '  %sIn state%s    %s%s\n'         "$dim" "$reset" "$state_dur" "$eol"
     printf '  %sMonitoring%s  %s%s\n%s\n'     "$dim" "$reset" "$total_dur" "$eol" "$eol"
-    printf '  %sPings%s       %s%d ok%s / %s%d fail%s   (%s%% success)%s\n' \
+    printf '  %sChecks%s      %s%d ok%s / %s%d fail%s   (%s%% success)%s\n' \
       "$dim" "$reset" "$green" "$total_ok" "$reset" "$red" "$total_fail" "$reset" "$success_pct" "$eol"
-    printf '  %sLast ping%s   %s%s\n'         "$dim" "$reset" "$last_latency" "$eol"
+    printf '  %sLast check%s  %s%s\n'         "$dim" "$reset" "$last_latency" "$eol"
     printf '  %sWindow%s      %s  %d%% loss%s\n%s\n' "$dim" "$reset" "$spark" "$loss_pct" "$eol" "$eol"
     printf '  %sRecent events%s%s\n'          "$dim" "$reset" "$eol"
     if [ -n "$events" ]; then
@@ -289,7 +294,7 @@ function connection-monitor() {
   printf '%sConnection Monitor stopped%s\n' "$bold" "$reset"
   printf '  Monitored:   %s\n' "$total_dur"
   printf '  Final state: %s%s%s\n' "$color" "$label" "$reset"
-  printf '  Pings:       %d ok / %d fail  (%d%% success)\n' "$total_ok" "$total_fail" "$success_pct"
+  printf '  Checks:      %d ok / %d fail  (%d%% success)\n' "$total_ok" "$total_fail" "$success_pct"
 }
 
 # Dependabot merge all PRs
