@@ -160,7 +160,7 @@ function connection-monitor() {
   [ -n "$BASH_VERSION" ] && { set +x; set +v; } 2>/dev/null
 
   local url="https://js.upscope.io/version.txt"
-  local timeout_secs=2
+  local timeout_secs=6
   local window=10
   local unstable_loss_pct=30
   local notify_group="connection-monitor"
